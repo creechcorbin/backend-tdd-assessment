@@ -7,7 +7,7 @@ Students are expected to edit this module, to add more tests to run
 against the 'echo.py' program.
 """
 
-__author__ = "???"
+__author__ = "Corbin Creech "
 
 import sys
 import importlib
@@ -88,6 +88,19 @@ class TestEcho(unittest.TestCase):
             result, argparse.ArgumentParser,
             "create_parser() function is not returning a parser object")
 
+    def test_help(self):
+        """Running the program without arguments should show usage."""
+
+        # Run the command `python ./echo.py -h` in a separate process, then
+        # collect its output.
+        process = subprocess.Popen(
+            ["python", "echo.py", "-h"],
+            stdout=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        with open("USAGE", 'r') as f:
+            usage = f.read()
+        self.assertEqual(stdout.decode(), usage)
+
     #
     # Students: add more parser tests here
     #
@@ -114,6 +127,48 @@ class TestEcho(unittest.TestCase):
         assert output, "The program did not print anything."
         self.assertEqual(output[0], "hello world")
 
+    def test_lower_argparse(self):
+        args = ["-l", "HELLO WORLD"]
+        parser = self.module.create_parser()
+        ns = parser.parse_args(args)
+        self.assertTrue(ns.lower)
+
+    def test_upper_short(self):
+        """Check if short option '-u' performs uppercasing"""
+        args = ["-u", "hello world"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "HELLO WORLD")
+
+    def test_upper_argparse(self):
+        args = ["-u", "hello world"]
+        parser = self.module.create_parser()
+        ns = parser.parse_args(args)
+        self.assertTrue(ns.upper)
+
+    def test_title_short(self):
+        """Check if short option '-t' performs titlecasing"""
+        args = ["-t", "hello world"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "Hello World")
+
+    def test_title_argparse(self):
+        args = ["-t", "hello world"]
+        parser = self.module.create_parser()
+        ns = parser.parse_args(args)
+        self.assertTrue(ns.title)
+
+    def test_all(self):
+        """Check if short options '-utl' perform casings in proper order"""
+        args = ["-utl", "hello world"]
+        with Capturing() as output:
+            self.module.main(args)
+        assert output, "The program did not print anything."
+        self.assertEqual(output[0], "Hello World")
+    
     #
     # Students: add more cmd line options tests here.
     #
